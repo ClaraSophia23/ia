@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestão Financeira</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 12px;
+      width: 350px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .balance {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 24px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 8px;
+    }
+
+    input, select {
+      background: #334155;
+      color: white;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 15px;
+    }
+
+    li {
+      background: #334155;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .income {
+      border-left: 5px solid #22c55e;
+    }
+
+    .expense {
+      border-left: 5px solid #ef4444;
+    }
+
+    .delete {
+      background: red;
+      border: none;
+      color: white;
+      padding: 5px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>💰 Finanças</h1>
+
+  <div class="balance" id="balance">Saldo: R$ 0.00</div>
+
+  <input type="text" id="desc" placeholder="Descrição">
+  <input type="number" id="amount" placeholder="Valor">
+  
+  <select id="type">
+    <option value="income">Receita</option>
+    <option value="expense">Despesa</option>
+  </select>
+
+  <button onclick="addTransaction()">Adicionar</button>
+
+  <ul id="list"></ul>
+</div>
+
+<script>
+  let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+
+  function save() {
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+  }
+
+  function updateUI() {
+    const list = document.getElementById("list");
+    const balanceEl = document.getElementById("balance");
+
+    list.innerHTML = "";
+
+    let balance = 0;
+
+    transactions.forEach((t, index) => {
+      const li = document.createElement("li");
+      li.classList.add(t.type);
+
+      if (t.type === "income") {
+        balance += t.amount;
+      } else {
+        balance -= t.amount;
+      }
+
+      li.innerHTML = `
+        ${t.desc} - R$ ${t.amount.toFixed(2)}
+        <button class="delete" onclick="removeTransaction(${index})">x</button>
+      `;
+
+      list.appendChild(li);
+    });
+
+    balanceEl.innerText = "Saldo: R$ " + balance.toFixed(2);
+  }
+
+  function addTransaction() {
+    const desc = document.getElementById("desc").value;
+    const amount = parseFloat(document.getElementById("amount").value);
+    const type = document.getElementById("type").value;
+
+    if (!desc || isNaN(amount)) {
+      alert("Preencha todos os campos!");
+      return;
+    }
+
+    transactions.push({ desc, amount, type });
+
+    save();
+    updateUI();
+
+    document.getElementById("desc").value = "";
+    document.getElementById("amount").value = "";
+  }
+
+  function removeTransaction(index) {
+    transactions.splice(index, 1);
+    save();
+    updateUI();
+  }
+
+  updateUI();
+</script>
+
+</body>
+</html>
